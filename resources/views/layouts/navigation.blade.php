@@ -1,4 +1,11 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
+ <!DOCTYPE html>
+<html>
+<head>
+    <title>Laravel Product List</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -12,14 +19,22 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" style="text-decoration: none;">
+                        {{ __('My Products') }}
                     </x-nav-link>
                 </div>
 
                 @if (Auth::user()->role ==="admin")
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    <x-nav-link :href="route('admin.users')" :active="request()->routeIs('admin.users')" >
+                    <x-nav-link :href="route('admin.users')" :active="request()->routeIs('admin.users')"  style="text-decoration: none;">
+                        Users
+                    </x-nav-link>
+                </div>
+                @endif
+
+                @if (Auth::user()->role ==="employee")
+                <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                    <x-nav-link :href="route('employee.users')" :active="request()->routeIs('employee.users')"  style="text-decoration: none;">
                         Users
                     </x-nav-link>
                 </div>
@@ -27,11 +42,22 @@
 
                 @if (Auth::user()->role ==="admin" or Auth::user()->role ==="employee")
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    <x-nav-link :href="route('products')" :active="request()->routeIs('products')" >
+                    <x-nav-link :href="route('products')" :active="request()->routeIs('products')"  style="text-decoration: none;">
                         Products
                     </x-nav-link>
                 </div>
                 @endif
+
+                <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                    <x-nav-link :href="route('price')" :active="request()->routeIs('price')"  style="text-decoration: none;">
+                        Price
+                    </x-nav-link>
+                </div>
+                <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                    <x-nav-link :href="route('contacts')" :active="request()->routeIs('contacts')"  style="text-decoration: none;">
+                        Contacts
+                    </x-nav-link>
+                </div>
             </div>
 
             <!-- Settings Dropdown -->
@@ -50,12 +76,8 @@
                     </x-slot>
 
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
+                        <x-dropdown-link :href="route('profile.edit')" style="text-decoration: none;">
                             {{ __('Profile') }}
-                        </x-dropdown-link>
-
-                        <x-dropdown-link :href="route('contacts')">
-                            {{ __('Contacts') }}
                         </x-dropdown-link>
 
                         <!-- Authentication -->
@@ -64,7 +86,7 @@
 
                             <x-dropdown-link :href="route('logout')"
                                     onclick="event.preventDefault();
-                                                this.closest('form').submit();">
+                                                this.closest('form').submit();" style="text-decoration: none;">
                                 {{ __('Log Out') }}
                             </x-dropdown-link>
                         </form>
@@ -87,27 +109,49 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
+            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" style="text-decoration: none;">
+                {{ __('My Products') }}
             </x-responsive-nav-link>
         </div>
         @if (Auth::user()->role ==="admin")
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('admin.users')" :active="request()->routeIs('admin.users')" >
+            <x-responsive-nav-link :href="route('admin.users')" :active="request()->routeIs('admin.users')"  style="text-decoration: none;">
                         Users
             </x-responsive-nav-link>
         </div>
 
                 @endif
 
+                @if (Auth::user()->role ==="employee")
+                <div class="pt-2 pb-3 space-y-1">
+                    <x-responsive-nav-link :href="route('employee.users')" :active="request()->routeIs('employee.users')"  style="text-decoration: none;">
+                                Users
+                    </x-responsive-nav-link>
+                </div>
+
+                @endif
+
                 @if (Auth::user()->role ==="admin" or Auth::user()->role ==="employee")
                 <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('products')" :active="request()->routeIs('products')" >
+            <x-responsive-nav-link :href="route('products')" :active="request()->routeIs('products')"  style="text-decoration: none;">
                         Products
             </x-responsive-nav-link>
         </div>
 
                 @endif
+                @if (Auth::user()->role ==="admin")
+        <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link :href="route('price')" :active="request()->routeIs('price')"  style="text-decoration: none;">
+                        Price
+            </x-responsive-nav-link>
+        </div>
+
+                @endif
+        <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link :href="route('contacts')" :active="request()->routeIs('contacts')"  style="text-decoration: none;">
+                        Contacts
+            </x-responsive-nav-link>
+        </div>
 
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200">
@@ -117,12 +161,10 @@
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile.edit')">
+                <x-responsive-nav-link :href="route('profile.edit')" style="text-decoration: none;">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('contacts')">
-                            {{ __('Contacts') }}
-                </x-responsive-nav-link>
+
 
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">
@@ -130,7 +172,7 @@
 
                     <x-responsive-nav-link :href="route('logout')"
                             onclick="event.preventDefault();
-                                        this.closest('form').submit();">
+                                        this.closest('form').submit();" style="text-decoration: none;">
                         {{ __('Log Out') }}
                     </x-responsive-nav-link>
                 </form>
@@ -138,3 +180,4 @@
         </div>
     </div>
 </nav>
+</body>

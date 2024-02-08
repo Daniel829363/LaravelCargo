@@ -4,72 +4,82 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\StripeController;
 use Illuminate\Http\Request;
+use App\Models\Contact;
 use App\Models\User;
 use App\Models\Product;
+use App\Models\Prices;
+use App\Http\Controllers\ExcelImportController;
+
+
+Route::get('/dashboard', function (Request $request) {
+    $user=$request->user();
+    $price=Prices::get()->first();
+    $products=Product::where('kod',$user->code)->get();
+    return view('dashboard',[
+        'products'=>$products,'user'=>$user,'price'=>$price
+    ]);
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/dashboard/filter', [ProductController::class, 'filterUser'])->name('products.filterUser');
+
+Route::get('/payment/{product}/checkout', [StripeController::class,'checkout'])->name('payment.checkout');
+Route::post('/session/{product}/session', [StripeController::class,'session'])->name('payment.session');
+Route::get('/success', 'App\Http\Controllers\StripeController@success')->name('payment.success');
+
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+
 Route::get('/contacts',function(){
-    return view('contact');
-})->name('contacts');
+    $contacts=Contact::get();
+    return view('contact',[
+        'contacts'=>$contacts
+]);
+})->middleware(['auth', 'verified'])->name('contacts');
 
-Route::get('/admin', function (Request $request) {
-    $users = User::get();
 
-    return view('admin.users', [
-        'users' => $users
-    ]);
-})->middleware(['auth', 'is_admin'])->name('admin.users');
-
-Route::get('/clients', function (Request $request) {
-    return view('dashboard');
-})->middleware(['auth', 'is_admin_or_employee']);
-
-/*Route::get('/admin/user/{id}/edit_role', function (string $id) {
-    $user = User::find($id);
-
-    return view('admin.edit_role', [
-        'user'=>$user
-    ]);
-});*/
-
+Route::get('/price',function(){
+    $price=Prices::get()->first();
+    return view('price',['price'=>$price]);
+})->middleware(['auth', 'verified'])->name('price');
 
 Route::middleware(['auth', 'is_admin'])->group(function () {
     // Маршруты для изменения ролей пользователей
-    /*Route::patch('/users/{user}/changeRoleToEmployee', [RoleController::class, 'changeRoleToEmployee'])
-        ->name('users.changeRoleToEmployee');
-
-    Route::patch('/users/{user}/changeRoleToAdmin', [RoleController::class, 'changeRoleToAdmin'])
-        ->name('users.changeRoleToAdmin');*/
-     Route::patch('/users/{user}/updateRole', [RoleController::class, 'updateRole'])
-        ->name('users.updateRole');
-
+Route::controller(UserController::class)->group(function(){
+    Route::get('users-export', 'export')->name('users.export');
+    Route::post('users-import', 'import')->name('users.import');
+    Route::get('users-filter', 'filter')->name('admin.users.filter');
+    Route::get('/admin', 'index')->name('admin.users');
+    Route::get('userEdit/{user}', 'editUser')->name('user.edit');
+    Route::get('/user/create', 'createView');
+    Route::post('user/create', 'create')->name('user.create');
+    Route::patch('/users/{user}/update', 'update')->name('user.update');
+    Route::delete('/users/{user}/delete', 'destroy')->name('user.destroy');
 });
-/*Route::post('/user/create', [UserController::class, 'create'])
-        ->name('user.create');*/
 
-Route::post('/user/create', function (Request $request){
+Route::controller(ContactController::class)->group(function(){
+    Route::post('add-contact', 'create')->name('create.contact');
+    Route::patch('update-contact', 'update')->name('update.contact');
+    Route::patch('update2-contact/{contact}', 'update2')->name('update2.contact');
+    Route::patch('del1-contact/{contact}', 'del1')->name('del1.contact');
+    Route::patch('del2-contact/{contact}', 'del2')->name('del2.contact');
+});
 
-    $user = new User;
-  $user->name = $request->name;
-  $user->number = $request->number;
-  $user->email = $request->email;
-  $user->code = $request->code;
-  $user->password = Hash::make('doni' . $request->code);
-  $user->save();
-    return redirect()->route('admin.users')->with('success', 'Успешно добавлена.');
-})->middleware(['auth', 'is_admin_or_employee'])->name('user.create');
 
-Route::get('/dashboard', function (Request $request) {
-    $user=$request->user();
-    $products=Product::where('kod',$user->code)->get();
-    return view('dashboard',[
-        'products'=>$products,'user'=>$user
-    ]);
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::patch('/price/{price}/edit',function(Request $request,Prices $price){
+    if($price->rate_dollar)$price->update(['rate_dollar'=>$request->rate_dollar]);
+    if($price->price_delivery)$price->update(['price_delivery'=>$request->price_delivery]);
+    return redirect()->back()->with('success', 'Успешно добавлена.');
+})->name('price.edit');
+});
+
+
 
 Route::get('/details/product/{id}', function (String $id) {
     $product=Product::find($id);
@@ -84,50 +94,53 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 Route::middleware(['auth', 'is_admin_or_employee'])->group(function () {
-    Route::get('/products', function () {
-  $products = Product::orderBy('created_at', 'asc')->get();
 
-  return view('products.product', [
-    'products' => $products
-  ]);
-})->name('products');
-
-Route::post('/product', function (Request $request) {
-  /*$validator = Validator::make($request->all(), [
-    'name' => 'required|max:255',
-  ]);
-
-  if ($validator->fails()) {
-    return redirect('/')
-      ->withInput()
-      ->withErrors($validator);
-  }*/
-
-  $product = new Product;
-  $product->trek_kod = $request->trek_kod;
-  $product->kod = $request->kod;
-  $product->weight = $request->weight;
-  $product->receipt_A = $request->receipt_A;
-  $product->dispatch_A = $request->dispatch_A;
-  $product->receipt_B = $request->receipt_B;
-  $product->issue = $request->issue;
-  $product->price = $request->price;
-  $product->save();
-
-  return redirect('/products');
+Route::controller(UserController::class)->group(function(){
+    Route::get('/employee/users-filter', 'filter')->name('employee.users.filter');
+    Route::get('/employee', 'employeeindex')->name('employee.users');
+    Route::get('employee/userEdit/{user}', 'employeeeditUser')->name('employee.user.edit');
+    Route::get('/employee/user/create', 'employeecreateView');
+    Route::post('/employee/user/create', 'employeecreate')->name('employee.user.create');
+    Route::post('/employee/users/{user}/update', 'employeeupdate')->name('employee.user.update');
 });
-Route::patch('/product/{product}/update', [ProductController::class, 'update'])->name('products.update');
-/*Route::patch('/product/{product}/update', function (Request $request,Product $product) {
-  $product->update(['trek_kod' => $request->trek_kod]);
-  $product->update(['kod' => $request->kod]);
-  $product->update(['weight' => $request->weight]);
-  $product->update(['receipt_A' => $request->receipt_A]);
-  $product->update(['dispatch_A' => $request->dispatch_A]);
-  $product->update(['receipt_B' => $request->receipt_B]);
-  $product->update(['issue' => $request->issue]);
 
-  return redirect('/products');
-})->middleware(['auth', 'is_admin_or_employee'])->name('products.update');*/
+Route::get('/product/create',function(){
+    return view('products.createProduct');
+})->name('product.create');
+
+Route::get('/product/create2',function(){
+    return view('products.create2Product');
+})->name('product.create');
+
+Route::get('/product/create3',function(){
+    return view('products.create3Product');
+})->name('product.create');
+
+Route::get('/product/create4',function(){
+    return view('products.create4Product');
+})->name('product.create');
+
+Route::controller(ProductController::class)->group(function(){
+    Route::get('products', 'index')->name('products');
+    Route::get('products-export', 'export')->name('products.export');
+    Route::post('products-import', 'import')->name('products.import');
+    Route::post('/product/create', 'create')->name('product.create');
+    Route::post('/product/create2', 'create')->name('product.create2');
+    Route::post('/product/create3', 'create')->name('product.create3');
+    Route::post('/product/create4', 'create')->name('product.create4');
+    Route::patch('/product/create', 'create')->name('product.create');
+    Route::patch('/product/create2', 'create')->name('product.create2');
+    Route::patch('/product/create3', 'create')->name('product.create3');
+    Route::patch('/product/create4', 'create')->name('product.create4');
+    Route::get('products-filter', 'filter')->name('products.filter');
+});
+
+Route::post('/product',[ProductController::class,'create'])->name('product.create');
+Route::get('productEdit/{product}',function(Product $product){
+        return view('products.editProduct',[
+            'product'=>$product]);
+    })->name('product.edit');
+Route::patch('/product/{product}/update', [ProductController::class, 'update'])->name('products.update');
 
 Route::delete('/product/{product}/delete', function (Product $product) {
   $product->delete();

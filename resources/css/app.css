@@ -9,6 +9,9 @@
 .output{
 	background-color:aqua;
 }
+.output td{
+    border: 2px solid #000; /* толщина 2 пикселя, цвет черный */
+}
 .output2{
 	background-color:blue;
 }
@@ -18,6 +21,8 @@
 .nametd{
 	margin-top: 25px;
 	background-color:yellowgreen;
+    border-radius:5px;
+    margin-bottom: 10px;
 }
 
 

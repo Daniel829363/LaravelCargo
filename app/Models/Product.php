@@ -18,5 +18,6 @@ class Product extends Model
         'receipt_B',
         'issue',
         'price',
+        'payment',
     ];
 }

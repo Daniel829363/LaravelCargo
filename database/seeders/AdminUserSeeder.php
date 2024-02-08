@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\User;
 
 class AdminUserSeeder extends Seeder
 {
@@ -12,10 +13,11 @@ class AdminUserSeeder extends Seeder
      */
     public function run()
 {
-    DB::table('users')->insert([
+    User::create([
         'name' => 'Администратор',
-        'email' => 'admin@example.com',
-        'password' => Hash::make('1234'),
+        'number' => '555000555',
+        'email' => 'admin@gmail.com',
+        'password' => ('admin'),
         'role' => 'admin',
     ]);
 }

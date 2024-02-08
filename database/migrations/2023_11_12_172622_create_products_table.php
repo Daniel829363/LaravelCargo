@@ -14,7 +14,10 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string('trek_kod');
-            $table->double('weight')->default('0.00');
+            $table->string('kod')->nullable();
+            $table->double('weight')->nullable();
+            $table->double('price')->nullable();
+            $table->boolean('payment')->default('0');
             $table->timestamp('receipt_A')->nullable();
             $table->timestamp('dispatch_A')->nullable();
             $table->timestamp('receipt_B')->nullable();

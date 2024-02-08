@@ -3,7 +3,7 @@
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
 
         </h2>
-        <a href="..\user/create" class="submit btn btn-primary">Create new User</a>
+        <a href="..\employee/user/create" class="submit btn btn-primary">Create new User</a>
         @if(session('success'))
             <div class="alert alert-success">
              {{ session('success') }}
@@ -15,8 +15,7 @@
             </div>
         @endif
     </x-slot>
-            @include('admin.allUsers')
-
+            @include('employee.allUsers')
 
 
                 </div>
