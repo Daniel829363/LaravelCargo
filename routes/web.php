@@ -15,7 +15,7 @@ use App\Models\Prices;
 use App\Http\Controllers\ExcelImportController;
 
 
-Route::get('/dashboard', function (Request $request) {
+Route::get('/', function (Request $request) {
     $user=$request->user();
     $price=Prices::get()->first();
     $products=Product::where('kod',$user->code)->get();
@@ -31,7 +31,7 @@ Route::post('/session/{product}/session', [StripeController::class,'session'])->
 Route::get('/success', 'App\Http\Controllers\StripeController@success')->name('payment.success');
 
 
-Route::get('/', function () {
+Route::get('/dashboard', function () {
     return view('welcome');
 });
 
