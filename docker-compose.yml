@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./:/var/www/
+      - ./_docker/nginx/:/etc/nginx/conf.d/
+    container_name: kargo_nginx
+    depends_on:
+      - app
+    ports:
+      - "8000:80"
+  app:
+    build: 
+      context: .
+      dockerfile: _docker/app/DockerFile
+    container_name: kargo_app
+    depends_on:
+        - db
+    volumes:
+      - ./:/var/www/
+  
+  db:
+    image: mysql:8.0
+    restart: always
+    volumes:
+      - ./tmp/db:/var/lib/mysql
+    environment:
+        MYSQL_DATABASE: myproject
+        MYSQL_USER: root
+        MYSQL_PASSWORD: root
+    ports:
+      - 8100:3306
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
+    container_name: kargo_db
+  
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      - PMA_HOST=db
+      - PMA_PORT=3306
+      - PMA_ARBITRARY=1
+    container_name: kargo_phpadmin
